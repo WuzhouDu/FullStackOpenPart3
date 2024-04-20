@@ -41,7 +41,7 @@ app.get('/api/persons/:id', (req, res) => {
     });
 
     if (searchedPerson) {
-        res.json(searchedPerson);
+        res.status(200).json(searchedPerson);
     }
     else {
         res.status(404).send("Sorry, not found");
@@ -56,10 +56,21 @@ app.delete('/api/persons/:id', (req, res) => {
 
 app.post('/api/persons', (req, res) => {
     const newPerson = req.body;
-    const newId = Math.random() * (1 << 32 - 1);
-    newPerson.id = newId;
-    persons = persons.concat(newPerson);
-    res.json(newPerson);
+    if (newPerson.name && newPerson.number) {
+        if (!persons.find(each => each.name == newPerson.name)) {
+            const newId = Math.random() * (1 << 32 - 1);
+            newPerson.id = newId;
+            persons = persons.concat(newPerson);
+            res.json(newPerson);
+        }
+        else {
+            return res.status(400).json({ error: "name should be unique" });
+        }
+    }
+    else {
+        return res.status(400).json({error: "name and number should not be empty"});
+    }
+
 });
 
 const PORT = 3002;
