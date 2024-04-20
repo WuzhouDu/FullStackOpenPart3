@@ -2,7 +2,7 @@ const express = require('express');
 
 const app = express();
 
-const persons = [
+let persons = [
     {
         "id": 1,
         "name": "Arto Hellas",
@@ -45,6 +45,12 @@ app.get('/api/persons/:id', (req, res) => {
     else {
         res.status(404).send("Sorry, not found");
     }
+});
+
+app.delete('/api/persons/:id', (req, res) => {
+    const deletedId = Number(req.params.id);
+    persons = persons.filter(each => each.id !== deletedId);
+    res.status(204).send();
 });
 
 const PORT = 3002;
