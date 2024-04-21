@@ -1,8 +1,10 @@
 const express = require('express');
 const morgan = require('morgan');
+const cors = require('cors');
 
 const app = express();
 app.use(express.json());
+app.use(cors());
 
 morgan.token('body', (req, res) => {
     if (req.method === 'POST') {
@@ -83,10 +85,22 @@ app.post('/api/persons', (req, res) => {
     else {
         return res.status(400).json({error: "name and number should not be empty"});
     }
-
 });
 
-const PORT = 3002;
+app.put('/api/persons/:id', (req, res) => {
+    const updatedPerson = req.body;
+    const updatedId = Number(req.params.id);
+    const updatedPersonIndex = persons.findIndex(each => each.id === updatedId);
+    if (updatedPersonIndex !== -1) {
+        persons[updatedPersonIndex] = updatedPerson;
+        res.json(updatedPerson);
+    }
+    else {
+        res.status(404).send("Sorry, not found");
+    }
+});
+
+const PORT = process.env.PORT || 3002;
 
 app.listen(PORT, () => {
     console.log(`listen on port ${PORT}`);
