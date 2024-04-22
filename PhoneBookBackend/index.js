@@ -50,27 +50,22 @@ app.delete('/api/persons/:id', (req, res, next) => {
         .catch(err => next(err));
 });
 
-app.post('/api/persons', (req, res) => {
+app.post('/api/persons', (req, res, next) => {
     const newPerson = req.body;
-    if (newPerson.name && newPerson.number) {
-        const newPersonInDB = new Person({ name: newPerson.name, number: newPerson.number });
-        newPersonInDB.save().then(savedPerson => {
-            res.json(savedPerson);
-        })
-            .catch(err => {
-                console.log(err);
-            });
-    }
-    else {
-        return res.status(400).json({ error: "name and number should not be empty" });
-    }
+    const newPersonInDB = new Person({ name: newPerson.name, number: newPerson.number });
+    newPersonInDB.save().then(savedPerson => {
+        res.json(savedPerson);
+    })
+        .catch(err => next(err));
+
+
 });
 
-app.put('/api/persons/:id', (req, res) => {
+app.put('/api/persons/:id', (req, res, next) => {
     const updatedPerson = req.body;
     const updatedId = req.params.id;
 
-    Person.findByIdAndUpdate(updatedId, { name: updatedPerson.name, number: updatedPerson.number }, { returnDocument: 'after' })
+    Person.findByIdAndUpdate(updatedId, { name: updatedPerson.name, number: updatedPerson.number }, { returnDocument: 'after', runValidators: true, context: 'query' })
         .then(result => {
             res.json(result);
             // console.log(result);
@@ -83,6 +78,8 @@ const errorHandler = (err, req, res, next) => {
 
     if (err.name === 'CastError') {
         return res.status(400).send({ error: `malformatted id` });
+    } else if (err.name === 'ValidationError') {
+        return res.status(400).json({ error: err.message });
     }
 
     next(err);

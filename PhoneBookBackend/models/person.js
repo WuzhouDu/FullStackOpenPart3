@@ -11,8 +11,22 @@ mongoose.connect(url)
         console.log(`error when connecting to ${url}, msg: ${err.message}`);
     });
 const phoneBookPersonSchema = new mongoose.Schema({
-    name: String,
-    number: String,
+    name: {
+        type: String,
+        minLength: 3,
+        required: true
+    },
+    number: {
+        type: String,
+        minLength: 8,
+        validate: {
+            validator: function(v) {
+                return /\d{2,3}-\d+/g.test(v);
+            },
+            message: props => `${props.value} is not a valid phone number!`,
+        },
+        required: [true, `phone number is required!`]
+    },
 });
 phoneBookPersonSchema.set('toJSON', {
     transform: (document, returnedObject) => {
